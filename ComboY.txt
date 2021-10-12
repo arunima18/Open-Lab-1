@@ -1,0 +1,94 @@
+#Combination of Numerical and Experimental- About Y
+
+import matplotlib.pyplot as plt
+import numpy as np
+import pandas as pd
+
+#Writing the Euler equations
+#dx1_dt = x2 * x3 * (I2 - I3) * (I1**()-1);
+#dx2_dt = x3 * x1 * (I3 - I1) * (I2**()-1);
+#dx3_dt = x1 * x2 * (I1 - I2) * (I3**()-1);
+
+def f1(x1,x2,x3,I1,I2,I3):
+    return (x2 * x3 * (I2 - I3))/I1
+
+def f2(x1,x2,x3,I1,I2,I3):
+    return (x3 * x1 * (I3 - I1))/I2
+
+def f3(x1,x2,x3,I1,I2,I3):
+    return (x1 * x2 * (I1 - I2))/I3
+
+#RK4 Method
+def rk4(X, Y, Z, T, h, I1,I2,I3):
+    i = 0
+    while i < 10000:
+        # k1 function
+        k1f1 = h * (f1(X[i], Y[i], Z[i], I1,I2,I3))
+        k1f2 = h * (f2(X[i], Y[i], Z[i], I1,I2,I3))
+        k1f3 = h * (f3(X[i], Y[i], Z[i], I1,I2,I3))
+        # k2 function
+        k2f1 = h * (f1(X[i] + h * k1f1 / 2, Y[i] + h * k1f1 / 2, Z[i] + h * k1f1 / 2, I1,I2,I3))
+        k2f2 = h * (f2(X[i] + h * k1f2 / 2, Y[i] + h * k1f2 / 2, Z[i] + h * k1f2 / 2, I1,I2,I3))
+        k2f3 = h * (f3(X[i] + h * k1f3 / 2, Y[i] + h * k1f3 / 2, Z[i] + h * k1f3 / 2, I1,I2,I3))
+        # k3 function
+        k3f1 = h * (f1(X[i] + h * k2f1 / 2, Y[i] + h * k2f1 / 2, Z[i] + h * k2f1 / 2, I1,I2,I3))
+        k3f2 = h * (f2(X[i] + h * k2f2 / 2, Y[i] + h * k2f2 / 2, Z[i] + h * k2f2 / 2, I1,I2,I3))
+        k3f3 = h * (f3(X[i] + h * k2f3 / 2, Y[i] + h * k2f3 / 2, Z[i] + h * k2f3 / 2, I1,I2,I3))
+        # k4 function
+        k4f1 = h * (f1(X[i] + h * k3f1, Y[i] + h * k3f1, Z[i] + h * k3f1, I1,I2,I3))
+        k4f2 = h * (f2(X[i] + h * k3f2, Y[i] + h * k3f2, Z[i] + h * k3f2, I1,I2,I3))
+        k4f3 = h * (f3(X[i] + h * k3f3, Y[i] + h * k3f3, Z[i] + h * k3f3, I1,I2,I3))
+        # updated values of x1,x2,x3
+        x1 = ((k1f1 + 2 * k2f1 + 2 * k3f1 + k4f1) / 6)
+        x2 = ((k1f2 + 2 * k2f2 + 2 * k3f2 + k4f2) / 6)
+        x3 = ((k1f3 + 2 * k2f3 + 2 * k3f3 + k4f3) / 6)
+
+        X.append(X[i] + x1)
+        Y.append(Y[i] + x2)
+        Z.append(Z[i] + x3)
+        T.append(T[i] + h)
+
+        i += 1
+
+    return X, Y, Z, T
+
+
+
+
+
+#Main function
+
+#Defining the moment of inertia
+I1=0.0004266
+I2=0.000092518
+I3=0.000516
+#Obtaining nUmerical Solutions
+#X1,Y1,Z1,T1=rk4([20.28675],[-2.088],[-4.56514],[4.842],0.0001,0.0004266,0.000092518,0.000516)       #w_x
+X2,Y2,Z2,T2=rk4([-0.34554],[-40.0323],[0.9618],[1.80217],0.0001,0.0004266,0.000092518,0.000516)     #w_y
+#X3,Y3,Z3,T3=rk4([0.165138],[-9.33432],[24.20605],[2.84549],0.0001,0.0004266,0.000092518,0.000516)   #w_z
+
+
+#Obtaining Expeirmental Solutions
+#data = np.genfromtxt('', delimiter=',')
+#print(data)
+
+data = pd.read_csv(r"C:\Users\Arunima Das\OneDrive\Desktop\4th Year Semester 7\Open Lab1\Gyro1.csv")
+#print(data)
+time=data['Time (s)']
+wx=data['Gyroscope x (rad/s)']
+wy=data['Gyroscope y (rad/s)']
+wz=data['Gyroscope z (rad/s)']
+plt.plot(time,wx, '--', label= 'wx-Experimental data', color='green')
+#plt.plot(time,wy,'--', label= 'wy-Experimental data', color='red' )
+#plt.plot(time,wz,'--', label= 'wz-Experimental data', color='black' )
+
+plt.plot(T2,X2, label= 'wx-Numerical Data', color='green')
+#plt.plot(T2,Y2, label= 'wy-Numerical Data', color='red')
+#plt.plot(T2,Z2, label= 'wz-Numerical Data', color='black')
+
+plt.xlim(1,3)
+plt.title('Rotation about y-axis')
+plt.xlabel('Time(s)')
+plt.ylabel('Angular Velocity(rad/s)')
+plt.legend()
+plt.show()
